@@ -37,6 +37,7 @@ i.e. player_1,player_2,probability_of_player_1_winning,
 The follow tutorials will walk you through the full process from exploring the data, to creating features, to finally modelling the problem. The tutorials are written in both R and Python
 * [R Walkthrough - HTML file. Note that this does not render in Github](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/aus-open-model-R.html)
 * [R Walkthrough - Notebook. Note that this does not render in Github](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/aus-open-model-R.Rmd)
+* [R Walkthrough - IPython Notebook - this does render in Github](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/Betfair%20Data%20Scientists'%20Australian%20Open%20Model%20-%20R%20Notebook.ipynb)
 * [R Walkthrough - R Script](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/aus-open-model-script.R)
 * [Python Walkthrough - Notebook](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/Betfair%20Data%20Scientists'%20Australian%20Open%20Model.ipynb])
 
