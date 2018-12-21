@@ -11,7 +11,7 @@ For a detailed outline of the task, the prizes, and to sign up, click [here](htt
 
 How an outline of our methodoly and thought process, read [this](https://www.betfair.com.au/hub/betfairs-aus-open-datathon-how-to-build-a-model/) article.
 
-### Prizes
+## Prizes
 |Place|Prize|Place|Prize|
 |-|-|-|-|
 |1|$5000|9|$500|
@@ -54,5 +54,5 @@ Alternatively, if you use R, you will need to install the following:
 * R
 * R Studio
 
-# Disclaimer
+## Disclaimer
 Note that whilst predictions are fun and rewarding to create, we can't promise that your betting strategy will be profitable. If implementing your own strategies please gamble responsibly and note that you are responsible for any winnings/losses incurred.
