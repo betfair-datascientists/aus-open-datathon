@@ -1,0 +1,434 @@
+---
+title: "Betfair Data Scientists' Australian Open Model"
+author: "James Ward"
+date: "21 December 2018"
+output: html_document
+---
+
+
+## Overview
+### The Task
+This notebook will outline how the Betfair Data Scientists went about modelling the Australian Open for Betfair's Australian Open Datathon. The task is simple: we ask you to predict the winner of every possible Australian Open matchup using data which we provide.
+
+The metric used to determine the winner will be log loss, based on the actual matchups that happen in the Open. For more information on log loss, click [here](http://wiki.fast.ai/index.php/Log_Loss).
+
+For a detailed outline of the task, the prizes, and to sign up, click [here](https://www.betfair.com.au/hub/australian-open-datathon/).
+
+How an outline of our methodoly and thought process, read [this](https://www.betfair.com.au/hub/betfairs-aus-open-datathon-how-to-build-a-model/) article.
+
+### Prizes
+|Place|Prize|Place|Prize|
+|-|-|-|-|
+|1|$5000|9|$500|
+|2|$3000|10|$500|
+|3|$2000|11|$200|
+|4|$1000|12|$200|
+|5|$750|13|$200|
+|6|$500|14|$200|
+|7|$500|15|$200|
+|8|$500|Total|$15250|
+
+### Submission
+* To submit your model, email your final submission to datathon@betfair.com.au. Note that you don't need to email your code, just your predictions in the format that we have specified
+* No submissions will be accepted prior to the Australian Open qualifying matches being completed and the final draw list being shared with registered participants (12 January 2019)
+* Submissions need to include all potential match ups during the Australian Open, i.e. all possible combinations for each men's and women's tournaments (this will be provided after the draw is announced and the Australian Open qualifying matches are completed (Jan 12th 2019))
+* Submissions must follow the format outlined above and shown in the 'Dummy Submission File'. Any submissions that are not in the correct format will not be accepted.
+* Submissions need to include the player names for the hypothetical match up and the probability of the first player winning
+i.e. player_1,player_2,probability_of_player_1_winning,
+* Submissions must be in a csv format
+* Only two models will be accepted per participant (one model for the men's draw, one model for the women's draw)
+
+## Exploring the Data
+First we need to get an idea of what the data looks like. Let's read the men's data in and get an idea of what it looks like. Note that you will need to install all the packages listed below unless you already have them.
+
+Note that for this tutorial I will be using `dplyr`, if you are not familiar with the syntax I encourage you to read up on [the basics](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html).
+
+```{r, message=FALSE, warning=FALSE}
+# Import libraries
+library(dplyr)
+library(readr)
+library(tidyr)
+library(RcppRoll)
+library(tidyselect)
+library(lubridate)
+library(stringr)
+library(zoo)
+library(purrr)
+library(h2o)
+library(DT)
+
+mens = readr::read_csv('data/ATP_matches.csv', na = ".") # NAs are indicated by .
+
+mens %>%
+  datatable(rownames = FALSE, extensions = 'Scroller', 
+            options = list(dom = "t", 
+            scrollY = 450,
+            scroller = TRUE,
+            scrollX = 600,
+            fixedColumns = TRUE)) %>%
+  formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+
+```
+
+As we can see, we have a `Winner` column, a `Loser` column, as well as other columns detailing the match details, and other columns which have the stats for that match. As we have a `Winner` column, if we use the current data structure to train a model we will leak the result. The model will simply learn that the actual winner comes from the `Winner` column, rather than learning from other features that we can create, such as `First Serve %`.
+
+To avoid this problem, let's reshape the data from wide to long, then shuffle the data. For this, we will define a function, `split_winner_loser_columns`, which splits the raw dataframe into two dataframes, appends them together, and then shuffles the data.
+
+Let's also remove all Grass and Clay matches from our data, as we will be modelling the Australian Open which is a hardcourt surface.
+
+Additionally, we will add a few columns, such as `Match_Id` and `Total_Games`. These will be useful later.
+
+```{r}
+split_winner_loser_columns <- function(df) {
+  # This function splits the raw data into two dataframes and appends them together then shuffles them
+  # This output is a dataframe with only one player's stats on each row (i.e. in long format)
+  
+  # Grab a df with only the Winner's stats
+  winner = df %>% 
+    select(-contains("Loser")) %>% # Select only the Winner columns + extra game info columns as a df
+    rename_at( # Rename all columns containing "Winner" to "Player" 
+      vars(contains("Winner")),
+      ~str_replace(., "Winner", "Player")
+    ) %>%
+    mutate(Winner = 1) # Create a target column
+  
+  # Repeat the process with the loser's stats
+  loser = df %>%
+    select(-contains("Winner")) %>%
+    rename_at(
+      vars(contains("Loser")),
+      ~str_replace(., "Loser", "Player")
+    ) %>%
+    mutate(Winner = 0)
+  
+  set.seed(183) # Set seed to replicate results - 183 is the most games played in a tennis match (Isner-Mahut)
+  
+  # Create a df that appends both the Winner and loser df together
+  combined_df = winner %>% 
+    rbind(loser) %>% # Append the loser df to the Winner df
+    slice(sample(1:n())) %>% # Randomise row order
+    arrange(Match_Id) %>% # Arrange by Match_Id
+    return()
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+# Read in men and womens data; randomise the data to avoid result leakage
+mens = readr::read_csv('data/ATP_matches.csv', na = ".") %>%
+  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>% # Filter to only use hardcourt games
+  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
+         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
+         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
+  split_winner_loser_columns() # Change the dataframe from wide to long
+
+mens %>%
+  datatable(rownames = FALSE, extensions = 'Scroller', 
+            options = list(dom = "t", 
+            scrollY = 450,
+            scroller = TRUE,
+            scrollX = 600,
+            fixedColumns = TRUE)) %>%
+  formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+
+```
+
+## Feature Creation
+Now that we have a fairly good understanding of what the data looks like, let's add some features. To do this we will define a function. Ideally we want to add features which will provide predictive power to our model. 
+
+Thinking about the dynamics of tennis, we know that players often will matches by "breaking" the opponent's serve (i.e. winning a game when the opponent is serving). This is especially important in mens tennis. Let's create a feature called `F_Player_BreakPoints_Per_Game`, which is the number of breakpoints a player gets per game that they play (even though they can only get breakpoints every second game, we will use total games). Let's also create a feature called `F_Player_Return_Win_Ratio` which is the proportion of points won when returning.
+
+Similarly, "holding" serve is important (i.e. winning a game when you are serving). Let's create a feature called `F_Player_Serve_Win_Ratio` which is the proportion of points won when serving.
+
+Finally, you only win a set of tennis by winning more sets than your opponent. To win a set, you need to win games. Let's create a feature called `F_Player_Game_Win_Percentage` which is the propotion of games that a player wins.
+
+```{r}
+add_ratio_features <- function(df) {
+  # This function adds ratio features to a long df
+  df %>%
+    mutate(
+      # Point Win ratio when serving
+      F_Player_Serve_Win_Ratio = (Player_FirstServes_Won + Player_SecondServes_Won - Player_DoubleFaults) / 
+        (Player_FirstServes_In + Player_SecondServes_In + Player_DoubleFaults), 
+      # Point win ratio when returning
+      F_Player_Return_Win_Ratio = Player_ReturnPoints_Won / Player_ReturnPoints_Faced, 
+      # Breakpoints per receiving game
+      F_Player_BreakPoints_Per_Game = Player_BreakPoints / Total_Games, 
+      F_Player_Game_Win_Percentage = Player_Games_Won / Total_Games
+    ) %>%
+    mutate_at(
+      vars(colnames(.), -contains("Rank"), -Tournament_Date), # Replace all NAs with0 apart from Rank, Date
+      ~ifelse(is.na(.), 0, .)
+    ) %>%
+    return()
+}
+
+
+mens = mens %>%
+  add_ratio_features() # Add features
+```
+
+Now that we have added our features, we need to create rolling averages for them. We cannot simply use current match statistics, as they will leak the result to the model. Instead, we need to use past match statistics to predict future matches. Here we will use a rolling mean with a window of 15. If the player hasn't played 15 games, we will instead use a cumulative mean. We will also lag the result so as to not leak the result.
+
+This next chunk of code simply takes all the columns starting with F_ and calculates these means.
+
+```{r}
+mens = mens %>% 
+  group_by(Player) %>% # Group by player
+  mutate_at( # Create a rolling mean with window 15 for each player. 
+    vars(starts_with("F_")), # If the player hasn't played 15 games, use a cumulative mean
+    ~coalesce(rollmean(., k = 15, align = "right", fill = NA_real_), cummean(.)) %>% lag()
+  ) %>%
+  ungroup()
+```
+
+## Creating a Training Feature Matrix
+In predictive modelling language - features are data metrics we use to predict an outcome or target variable. We have several choices to make before we get to the prediction phase. What are the features? How do we structure the outcome variable? What does each row mean? Do we use all data or just a subset? We narrowed it down to two options
+
+We can train the model on every tennis match in the data set, or
+We can only train the model on Australian Open matches.
+Doing Option 1 would mean we have a lot more data to build a strong model, but it might be challenging to work around the constraints described in the tournament structure.
+
+Doing Option 2 fits better from that angle but leaves us with very few matches to train our model on.
+ 
+We have decided to go with an option that combines strengths from both approaches, by training the model on matches from the Aus Open and the US Open because both grand slams are played on the same surface - hard court.
+
+However, we also need to train our model in the same way that will be used to predict the 2019 Australian Open. When predicting the 2nd round, we won't have data from the 1st round. So we will need to build our training feature matrix with this in mind. We should extract features for a player from past games at the start of the tournament and apply them to every matchup that that player plays.
+
+To do this, we will create a function, `extract_latest_features_for_tournament`, which maps over our feature dataframe for the dates in the first round of a tournament and grabs features.
+
+First, we need the Australian Open and US Open results - let's grab these and then apply our function.
+
+```{r}
+# Get Australian Open and US Open Results
+aus_us_open_results = 
+  mens %>%
+  filter((Tournament == "Australian Open, Melbourne" | Tournament == "U.S. Open, New York")
+         & Round_Description != "Qualifying" & Tournament_Date != "2012-01-16") %>% # Filter out qualifiers
+  select(Match_Id, Player, Tournament, Tournament_Date, Round_Description, Winner)
+
+# Create a function which extracts features for each tournament
+extract_latest_features_for_tournament = function(df, dte) {
+  
+  df %>% # Filter for the 1st round
+    filter(Tournament_Date == dte, Round_Description == "First Round", Tournament_Date != "2012-01-16") %>% 
+    group_by(Player) %>% # Group by player
+    select_at(
+      vars(Match_Id, starts_with("F_"), Player_Rank) # Grab the players' features
+    ) %>%
+    rename(F_Player_Rank = Player_Rank) %>%
+    ungroup() %>%
+    mutate(Feature_Date = dte) %>%
+    select(Player, Feature_Date, everything())
+}
+
+# Create a feature matrix in long format
+feature_matrix_long = 
+  aus_us_open_results %>%
+  distinct(Tournament_Date) %>% # Pull all Tournament Dates
+  pull() %>%
+  map_dfr(
+    ~extract_latest_features_for_tournament(mens, .) # Get the features
+  ) %>%
+  filter(Feature_Date != "2012-01-16") %>% # Filter out the first Aus Open
+  mutate_at( # Replace NAs with the mean
+    vars(starts_with("F_")),
+    ~ifelse(is.na(.), mean(., na.rm = TRUE), .)
+  )
+
+```
+
+Now that we have a feature matrix in long format, we need to convert it to wide format so that the features are on the same row. To do this we will define a function `gather_df`, which converts the dataframe from long to wide.
+Let's also join the results to the matrix and convert the `Winner` column to a factor. Finally, we will take the difference of player1 and player2's features, so as to reduce the dimensionality of the model.
+
+```{r}
+gather_df <- function(df) {
+  # This function puts the df back into its original format of each row containing stats for both players
+  df %>%
+    arrange(Match_Id) %>%
+    filter(row_number() %% 2 != 0) %>% # Filter for every 2nd row, starting at the 1st index. e.g. 1, 3, 5
+    rename_at( # Rename columns to player_1
+      vars(contains("Player")),
+      ~str_replace(., "Player", "player_1")
+    ) %>%
+    inner_join(df %>%
+                 filter(row_number() %% 2 == 0) %>%
+                 rename_at(
+                   vars(contains("Player")), # Rename columns to player_2
+                   ~str_replace(., "Player", "player_2")
+                 ) %>%
+                 select(Match_Id, contains("Player")),
+               by=c('Match_Id')
+    ) %>%
+    select(Match_Id, player_1, player_2, Winner, everything()) %>%
+    return()
+}
+
+
+# Joining results to features
+feature_matrix_wide = aus_us_open_results %>%
+  inner_join(feature_matrix_long %>% 
+               select(-Match_Id), 
+             by = c("Player", "Tournament_Date" = "Feature_Date")) %>%
+  gather_df() %>%
+  mutate(
+    F_Serve_Win_Ratio_Diff = F_player_1_Serve_Win_Ratio - F_player_2_Serve_Win_Ratio,
+    F_Return_Win_Ratio_Diff = F_player_1_Return_Win_Ratio - F_player_2_Return_Win_Ratio,
+    F_Game_Win_Percentage_Diff = F_player_1_Game_Win_Percentage - F_player_2_Game_Win_Percentage,
+    F_BreakPoints_Per_Game_Diff = F_player_1_BreakPoints_Per_Game - F_player_2_BreakPoints_Per_Game,
+    F_Rank_Diff = (F_player_1_Rank - F_player_2_Rank),
+    Winner = as.factor(Winner)
+  ) %>%
+  select(Match_Id, player_1, player_2, Tournament, Tournament_Date, Round_Description, Winner, contains("Diff"))
+
+train = feature_matrix_wide
+
+train %>%
+  datatable(rownames = FALSE, extensions = 'Scroller', 
+            options = list(dom = "t", 
+            scrollY = 450,
+            scroller = TRUE,
+            scrollX = 600,
+            fixedColumns = TRUE)) %>%
+  formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+```
+
+## Creating the Feature Matrix for the 2019 Australian Open
+Now that we have our training set, `train`, we need to create a feature matrix to create predictions on. To do this, we need to generate features again. We could simply append a player list to our raw dataframe, create a mock date and then use the `extract_latest_features_for_tournament` function that we used before. 
+Instead, we're going to create a lookup table for each unique player in the 2019 Australian Open. We will need to get their last 15 games and then find the mean for each feature so that our features are the same.
+
+Let's first explore what the dummy submission file looks like, then use it to get the unique players.
+```{r message=FALSE, warning=FALSE}
+read_csv('data/men_dummy_submission_file.csv') %>% glimpse()
+```
+
+As we can see, the dummy submission file contains every potential match up for the Open. This will be updated a few days before the Open starts with the actual players playing. Let's now create the lookup feature table.
+
+```{r message=FALSE, warning=FALSE}
+# Get a vector of unique players in this years' open using the dummy submission file
+unique_players = read_csv('data/men_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
+
+# Get the last 15 games played for each unique player and find their features
+lookup_feature_table = read_csv('data/ATP_matches.csv', na = ".") %>%
+  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
+  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
+         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
+         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
+  # clean_missing_data() %>% # Clean missing data
+  split_winner_loser_columns() %>% # Change the dataframe from wide to long
+  add_ratio_features() %>%
+  filter(Player %in% unique_players) %>%
+  group_by(Player) %>%
+  top_n(15, Match_Id) %>%
+  summarise(
+    F_Player_Serve_Win_Ratio = mean(F_Player_Serve_Win_Ratio),
+    F_Player_Return_Win_Ratio = mean(F_Player_Return_Win_Ratio),
+    F_Player_BreakPoints_Per_Game = mean(F_Player_BreakPoints_Per_Game),
+    F_Player_Game_Win_Percentage = mean(F_Player_Game_Win_Percentage),
+    F_Player_Rank = last(Player_Rank)
+  )
+```
+
+Now let's create features for every single combination. To do this we'll join our `lookup_feature_table` to the `player_1` and `player_2` columns in the `dummy_submission_file`.
+
+```{r message=FALSE, warning=FALSE}
+# Create feature matrix for the Australian Open for all player 1s
+features_player_1 = read_csv('data/men_dummy_submission_file.csv') %>%
+  select(player_1) %>%
+  inner_join(lookup_feature_table, by=c("player_1" = "Player")) %>%
+  rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
+         F_player_1_Return_Win_Ratio = F_Player_Return_Win_Ratio,
+         F_player_1_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
+         F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
+         F_player_1_Rank = F_Player_Rank)
+
+# Create feature matrix for the Australian Open for all player 2s
+features_player_2 = read_csv('data/men_dummy_submission_file.csv') %>%
+  select(player_2) %>%
+  inner_join(lookup_feature_table, by=c("player_2" = "Player")) %>%
+  rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
+         F_player_2_Return_Win_Ratio = F_Player_Return_Win_Ratio,
+         F_player_2_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
+         F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
+         F_player_2_Rank = F_Player_Rank)
+
+# Join the two dfs together and subtract features to create Difference features
+aus_open_2019_features = features_player_1 %>% 
+  bind_cols(features_player_2) %>%
+  select(player_1, player_2, everything()) %>%
+  mutate(
+    F_Serve_Win_Ratio_Diff = F_player_1_Serve_Win_Ratio - F_player_2_Serve_Win_Ratio,
+    F_Return_Win_Ratio_Diff = F_player_1_Return_Win_Ratio - F_player_2_Return_Win_Ratio,
+    F_Game_Win_Percentage_Diff = F_player_1_Game_Win_Percentage - F_player_2_Game_Win_Percentage,
+    F_BreakPoints_Per_Game_Diff = F_player_1_BreakPoints_Per_Game - F_player_2_BreakPoints_Per_Game,
+    F_Rank_Diff = (F_player_1_Rank - F_player_2_Rank)
+  ) %>%
+  select(player_1, player_2, contains("Diff"))
+
+
+aus_open_2019_features  %>%
+  datatable(rownames = FALSE, extensions = 'Scroller', 
+            options = list(dom = "t",
+                          scrollY = 450,
+                          scroller = TRUE,
+                          scrollX = 600,
+                          fixedColumns = TRUE)) %>%
+  formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+```
+
+## Generating 2019 Australian Open Predictions
+Now that we have our features, we can finally train our model and generate predictions for the 2019 Australian Open. Due to its simplicity, we will use h2o's Auto Machine Learning function `h2o.automl`. This will train a heap of different models and optimise the hyperparameters, as well as creating stacked ensembles automatically for us. We will use optimising by log loss.
+
+First, we must create h2o frames for our training and feature dataframes. Then we will run `h2o.automl`. Note that we can set the `max_runtime_secs` parameter. As this is a notebook, I have set it for 30 seconds - but I suggest you give it 10 minutes to create the best model. We can then create our predictions and assign them back to our `aus_open_2019_features` dataframe. Finally, we will group_by player and find the best player, on average.
+```{r message=FALSE, warning=FALSE, include=FALSE}
+## Setup H2O
+h2o.init(ip = "localhost",
+         port = 54321,
+         enable_assertions = TRUE,
+         nthreads = 2,
+         max_mem_size = "24g"
+         
+)
+
+## Sending file to h2o
+train_h2o = feature_matrix_wide %>%
+  select(contains("Diff"), Winner) %>%
+  as.h2o(destination_frame = "train_h2o")
+
+aus_open_2019_features_h2o = aus_open_2019_features %>%
+  select(contains("Diff")) %>%
+  as.h2o(destination_frame = "aus_open_2019_features_h2o")
+
+## Running Auto ML 
+mens_model = h2o.automl(y = "Winner",
+                        training_frame = train_h2o,
+                        max_runtime_secs = 30,
+                        max_models = 100,
+                        stopping_metric = "logloss",
+                        sort_metric = "logloss",
+                        balance_classes = TRUE,
+                        seed = 183) # Set seed to replicate results - 183 is the most games played in a tennis match (Isner-Mahut)
+
+## Predictions on test frame
+predictions = h2o.predict(mens_model@leader, aus_open_2019_features_h2o) %>%
+  as.data.frame()
+
+aus_open_2019_features$prob_player_1 = predictions$p1
+aus_open_2019_features$prob_player_2 = predictions$p0
+
+h2o.shutdown(prompt = FALSE)
+```
+Now let's find the best player by taking the mean of the prediction probability by player.
+```{r}
+aus_open_2019_features %>% 
+  select(player_1, starts_with("F_"), prob_player_1) %>%
+  group_by(player_1) %>%
+  summarise_all(mean) %>%
+  arrange(desc(prob_player_1)) %>%
+  datatable(rownames = FALSE, extensions = 'Scroller', 
+            options = list(dom = "t",
+                          scrollY = 450,
+                          scroller = TRUE,
+                          scrollX = 600,
+                          fixedColumns = TRUE)) %>%
+  formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+```
