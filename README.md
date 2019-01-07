@@ -52,14 +52,6 @@ aus_open_2019_features %>%
 ```
 |Place|Prize|Place|Prize|
 |-|-|-|-|
-|1|$5000|9|$500|
-|2|$3000|10|$500|
-|3|$2000|11|$200|
-|4|$1000|12|$200|
-|5|$750|13|$200|
-|6|$500|14|$200|
-|7|$500|15|$200|
-|8|$500|Total|$15250|
 |player_1|F_Serve_Win_Ratio_Diff|F_Return_Win_Ratio_Diff|F_Game_Win_Percentage_Diff|F_BreakPoints_Per_Game_Diff|prob_player_1|
 |Novak Djokovic|0.1109364627|0.076150615|0.1483970690|0.17144300|0.8616486|
 |Karen Khachanov|0.0960639298|0.061436164|0.1059967623|0.04544955|0.8339594|
