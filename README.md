@@ -49,15 +49,25 @@ aus_open_2019_features %>%
   group_by(player_1) %>%
   summarise_all(mean) %>%
   arrange(desc(prob_player_1))
-  
-player_1	F_Serve_Win_Ratio_Diff	F_Return_Win_Ratio_Diff	F_Game_Win_Percentage_Diff	F_BreakPoints_Per_Game_Diff	prob_player_1
-Novak Djokovic	0.1109364627	0.076150615	0.1483970690	0.17144300	0.8616486
-Karen Khachanov	0.0960639298	0.061436164	0.1059967623	0.04544955	0.8339594
-Juan Martin del Potro	0.1003931993	0.042025222	0.0847985439	0.05943767	0.8218308
-Rafael Nadal	0.0480432305	0.051531252	0.0790179917	0.08181694	0.8032543
-Gilles Simon	0.0646937767	0.084843307	0.0901401318	0.08675350	0.7985995
-Roger Federer	0.0452014997	0.040992497	0.0725719954	0.01817046	0.7962289
 ```
+|Place|Prize|Place|Prize|
+|-|-|-|-|
+|1|$5000|9|$500|
+|2|$3000|10|$500|
+|3|$2000|11|$200|
+|4|$1000|12|$200|
+|5|$750|13|$200|
+|6|$500|14|$200|
+|7|$500|15|$200|
+|8|$500|Total|$15250|
+|player_1|F_Serve_Win_Ratio_Diff|F_Return_Win_Ratio_Diff|F_Game_Win_Percentage_Diff|F_BreakPoints_Per_Game_Diff|prob_player_1|
+|Novak Djokovic|0.1109364627|0.076150615|0.1483970690|0.17144300|0.8616486|
+|Karen Khachanov|0.0960639298|0.061436164|0.1059967623|0.04544955|0.8339594|
+|Juan Martin del Potro|0.1003931993|0.042025222|0.0847985439|0.05943767|0.8218308|
+|Rafael Nadal|0.0480432305|0.051531252|0.0790179917|0.08181694|0.8032543|
+|Gilles Simon|0.0646937767|0.084843307|0.0901401318|0.08675350|0.7985995|
+|Roger Federer|0.0452014997|0.040992497|0.0725719954|0.01817046|0.7962289|
+
 
 
 ## Requirements
