@@ -55,7 +55,7 @@ aus_open_2019_features %>%
   arrange(desc(prob_player_1))
 ```
 |player_1|F_Serve_Win_Ratio_Diff|F_Return_Win_Ratio_Diff|F_Game_Win_Percentage_Diff|F_BreakPoints_Per_Game_Diff|F_Rank_Diff|player_1_win_probability|
-|-|-|-|-|-|-|
+|-|-|-|-|-|-|-|
 |Novak Djokovic|0.10632023|0.05928945|0.12587775|0.109932037|-63.33858|0.8589674|
 |Karen Khachanov|0.10054146|0.06688368|0.11350589|0.056474608|-54.45669|0.8558480|
 |Juan Martin del Potro|0.09863615|0.04637817|0.09084452|0.066516476|-60.70866|0.8489047|
