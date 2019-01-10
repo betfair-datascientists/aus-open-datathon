@@ -1,3 +1,6 @@
+# This script will outline an example of creating a tennis model and creating predictions using the final dataset
+# Predictions will be created for both the mens and womens draw
+
 # Import libraries
 library(dplyr)
 library(readr)
@@ -11,6 +14,10 @@ library(stringr)
 library(zoo)
 library(purrr)
 library(h2o)
+
+##########################
+#### Define functions ####
+##########################
 
 split_winner_loser_columns <- function(df) {
   # This function splits the raw data into two dataframes and appends them together then shuffles them
@@ -43,6 +50,7 @@ split_winner_loser_columns <- function(df) {
     return()
 }
 
+
 gather_df <- function(df) {
   # This function puts the df back into its original format of each row containing stats for both players
   df %>%
@@ -65,6 +73,7 @@ gather_df <- function(df) {
     return()
 }
 
+
 add_ratio_features <- function(df) {
   # This function adds ratio features to the appended df
   df %>%
@@ -83,9 +92,8 @@ add_ratio_features <- function(df) {
 }
 
 
-# This function cleans missing data
 clean_missing_data = function(df) {
-  
+  # This function cleans missing data
   df %>%
     mutate(
       Winner_ReturnPoints_Faced = ifelse(is.na(Winner_ReturnPoints_Faced), Loser_FirstServes_In + Loser_SecondServes_In, Winner_ReturnPoints_Faced),
@@ -107,33 +115,8 @@ clean_missing_data = function(df) {
 }
 
 
-# Read in men and womens data; randomise the data to avoid result leakage
-mens = readr::read_csv('data/ATP_matches.csv', na = ".") %>%
-  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
-  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
-         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
-         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
-  # clean_missing_data() %>% # Clean missing data
-  split_winner_loser_columns() %>% # Change the dataframe from wide to long
-  add_ratio_features() %>% # Add features
-  group_by(Player) %>%
-  mutate_at( # Create a rolling mean with window 15 for each player. If the player hasn't played 15 games, use a cumulative mean
-    vars(starts_with("F_")),
-    ~coalesce(rollmean(., k = 15, align = "right", fill = NA_real_), cummean(.)) %>% lag()
-  ) %>%
-  ungroup()
-
-# Create a df of only aus open and us open results
-aus_us_open_results = 
-  mens %>%
-  filter((Tournament == "Australian Open, Melbourne" | Tournament == "U.S. Open, New York") 
-         & Round_Description != "Qualifying" & Tournament_Date != "2012-01-16") %>%
-  select(Match_Id, Player, Tournament, Tournament_Date, Round_Description, Winner)
-
-
-# Create a function which extracts the latest features for tournaments (features before the tournament)
 extract_latest_features_for_tournament = function(df, dte) {
-  
+  # This function extracts the latest features for tournaments (features before the tournament)
   df %>%
     filter(Tournament_Date == dte, Round_Description == "First Round", Tournament_Date != "2012-01-16") %>%
     group_by(Player) %>%
@@ -147,9 +130,58 @@ extract_latest_features_for_tournament = function(df, dte) {
   
 }
 
+
+##############################
+#### Create training data ####
+##############################
+
+# Read in men and womens data; randomise the data to avoid result leakage
+mens = readr::read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
+  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
+  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
+         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
+         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
+  split_winner_loser_columns() %>% # Change the dataframe from wide to long
+  add_ratio_features() %>% # Add features
+  group_by(Player) %>%
+  mutate_at( # Create a rolling mean with window 15 for each player. If the player hasn't played 15 games, use a cumulative mean
+    vars(starts_with("F_")),
+    ~coalesce(rollmean(., k = 15, align = "right", fill = NA_real_), cummean(.)) %>% lag()
+  ) %>%
+  ungroup()
+
+womens = readr::read_csv('data/WTA_data_Jan_10.csv', na = ".") %>%
+  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
+  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
+         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
+         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
+  split_winner_loser_columns() %>% # Change the dataframe from wide to long
+  add_ratio_features() %>% # Add features
+  group_by(Player) %>%
+  mutate_at( # Create a rolling mean with window 15 for each player. If the player hasn't played 15 games, use a cumulative mean
+    vars(starts_with("F_")),
+    ~coalesce(rollmean(., k = 15, align = "right", fill = NA_real_), cummean(.)) %>% lag()
+  ) %>%
+  ungroup()
+
+
+# Create a df of only aus open and us open results for both mens and womens results
+aus_us_open_results_mens = 
+  mens %>%
+  filter((Tournament == "Australian Open, Melbourne" | Tournament == "U.S. Open, New York") 
+         & Round_Description != "Qualifying" & Tournament_Date != "2012-01-16") %>%
+  select(Match_Id, Player, Tournament, Tournament_Date, Round_Description, Winner)
+
+aus_us_open_results_womens = 
+  womens %>%
+  filter((Tournament == "Australian Open, Melbourne" | Tournament == "U.S. Open, New York") 
+         & Round_Description != "Qualifying" & Tournament_Date != "2012-01-16") %>%
+  select(Match_Id, Player, Tournament, Tournament_Date, Round_Description, Winner)
+
+
 # Convert the feature matrix to long format
-feature_matrix_long = 
-  aus_us_open_results %>%
+feature_matrix_long_mens = 
+  aus_us_open_results_mens %>%
   distinct(Tournament_Date) %>%
   pull() %>%
   map_dfr(
@@ -161,10 +193,37 @@ feature_matrix_long =
     ~ifelse(is.na(.), mean(., na.rm = TRUE), .)
   )
 
+feature_matrix_long_womens = 
+  aus_us_open_results_womens %>%
+  distinct(Tournament_Date) %>%
+  pull() %>%
+  map_dfr(
+    ~extract_latest_features_for_tournament(womens, .)
+  ) %>%
+  filter(Feature_Date != "2012-01-16") %>% # Filter out the first Aus open as we don't have enough data before it
+  mutate_at( # Replace NAs with the mean
+    vars(starts_with("F_")),
+    ~ifelse(is.na(.), mean(., na.rm = TRUE), .)
+  )
 
 # Joining results to features
-feature_matrix_wide = aus_us_open_results %>%
-  inner_join(feature_matrix_long %>% 
+feature_matrix_wide_mens = aus_us_open_results_mens %>%
+  inner_join(feature_matrix_long_mens %>% 
+               select(-Match_Id), 
+             by = c("Player", "Tournament_Date" = "Feature_Date")) %>%
+  gather_df() %>%
+  mutate(
+    F_Serve_Win_Ratio_Diff = F_player_1_Serve_Win_Ratio - F_player_2_Serve_Win_Ratio,
+    F_Return_Win_Ratio_Diff = F_player_1_Return_Win_Ratio - F_player_2_Return_Win_Ratio,
+    F_Game_Win_Percentage_Diff = F_player_1_Game_Win_Percentage - F_player_2_Game_Win_Percentage,
+    F_BreakPoints_Per_Game_Diff = F_player_1_BreakPoints_Per_Game - F_player_2_BreakPoints_Per_Game,
+    F_Rank_Diff = (F_player_1_Rank - F_player_2_Rank),
+    Winner = as.factor(Winner)
+  ) %>%
+  select(Match_Id, player_1, player_2, Tournament, Tournament_Date, Round_Description, Winner, everything())
+
+feature_matrix_wide_womens = aus_us_open_results_womens %>%
+  inner_join(feature_matrix_long_womens %>% 
                select(-Match_Id), 
              by = c("Player", "Tournament_Date" = "Feature_Date")) %>%
   gather_df() %>%
@@ -179,19 +238,25 @@ feature_matrix_wide = aus_us_open_results %>%
   select(Match_Id, player_1, player_2, Tournament, Tournament_Date, Round_Description, Winner, everything())
 
 
-# Get the last 15 games played for each unique player
-unique_players = read_csv('data/men_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
+###################################
+#### Create 2019 features data ####
+###################################
 
-# Create a feature table
-lookup_feature_table = read_csv('data/ATP_matches.csv', na = ".") %>%
+# Let's create features for both men and women using the past 15 games that they have played
+
+# Get the last 15 games played for each unique player
+unique_players_mens = read_csv('data/men_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
+unique_players_womens = read_csv('data/women_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
+
+# Create a feature table for both mens and womens
+lookup_feature_table_mens = read_csv('data/ATP_matches_Jan_10.csv.csv', na = ".") %>%
   filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
   mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
          Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
          Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
-  # clean_missing_data() %>% # Clean missing data
   split_winner_loser_columns() %>% # Change the dataframe from wide to long
   add_ratio_features() %>%
-  filter(Player %in% unique_players) %>%
+  filter(Player %in% unique_players_mens) %>%
   group_by(Player) %>%
   top_n(15, Match_Id) %>%
   summarise(
@@ -202,28 +267,79 @@ lookup_feature_table = read_csv('data/ATP_matches.csv', na = ".") %>%
     F_Player_Rank = last(Player_Rank)
   )
 
-# Create a feature matrix for all the player_1s
-draw_player_1 = read_csv('data/men_dummy_submission_file.csv') %>%
+# Create a feature table for both mens and womens
+lookup_feature_table_womens = read_csv('data/WTA_matches_Jan_10.csv', na = ".") %>%
+  filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
+  mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
+         Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
+         Total_Games = Winner_Games_Won + Loser_Games_Won) %>% # Add a total games played column
+  split_winner_loser_columns() %>% # Change the dataframe from wide to long
+  add_ratio_features() %>%
+  filter(Player %in% unique_players_womens) %>%
+  group_by(Player) %>%
+  top_n(15, Match_Id) %>%
+  summarise(
+    F_Player_Serve_Win_Ratio = mean(F_Player_Serve_Win_Ratio),
+    F_Player_Return_Win_Ratio = mean(F_Player_Return_Win_Ratio),
+    F_Player_BreakPoints_Per_Game = mean(F_Player_BreakPoints_Per_Game),
+    F_Player_Game_Win_Percentage = mean(F_Player_Game_Win_Percentage),
+    F_Player_Rank = last(Player_Rank)
+  )
+
+
+# Create a feature matrix for all the player_1s by joining to the lookup feature table on name
+draw_player_1_mens = read_csv('data/men_dummy_submission_file.csv') %>%
   select(player_1) %>%
-  inner_join(lookup_feature_table, by=c("player_1" = "Player")) %>%
+  inner_join(lookup_feature_table_mens, by=c("player_1" = "Player")) %>%
   rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_1_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_1_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
          F_player_1_Rank = F_Player_Rank)
 
-# Create a feature matrix for all the player_2s
-draw_player_2 = read_csv('data/men_dummy_submission_file.csv') %>%
+draw_player_1_womens = read_csv('data/women_dummy_submission_file.csv') %>%
+  select(player_1) %>%
+  inner_join(lookup_feature_table_womens, by=c("player_1" = "Player")) %>%
+  rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
+         F_player_1_Return_Win_Ratio = F_Player_Return_Win_Ratio,
+         F_player_1_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
+         F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
+         F_player_1_Rank = F_Player_Rank)
+
+# Create a feature matrix for all the player_2s by joining to the lookup feature table on name
+draw_player_2_mens = read_csv('data/men_dummy_submission_file.csv') %>%
   select(player_2) %>%
-  inner_join(lookup_feature_table, by=c("player_2" = "Player")) %>%
+  inner_join(lookup_feature_table_mens, by=c("player_2" = "Player")) %>%
   rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_2_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_2_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
          F_player_2_Rank = F_Player_Rank)
 
-aus_open_2019_features = draw_player_1 %>% 
-  bind_cols(draw_player_2) %>%
+draw_player_2_womens = read_csv('data/women_dummy_submission_file.csv') %>%
+  select(player_2) %>%
+  inner_join(lookup_feature_table_womens, by=c("player_2" = "Player")) %>%
+  rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
+         F_player_2_Return_Win_Ratio = F_Player_Return_Win_Ratio,
+         F_player_2_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
+         F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
+         F_player_2_Rank = F_Player_Rank)
+
+# Bind the two dfs together and only select the players' names and features (which start with 'F_' for simplicity)
+aus_open_2019_features_mens = draw_player_1_mens %>% 
+  bind_cols(draw_player_2_mens) %>%
+  select(player_1, player_2, everything()) %>%
+  mutate(
+    F_Serve_Win_Ratio_Diff = F_player_1_Serve_Win_Ratio - F_player_2_Serve_Win_Ratio,
+    F_Return_Win_Ratio_Diff = F_player_1_Return_Win_Ratio - F_player_2_Return_Win_Ratio,
+    F_Game_Win_Percentage_Diff = F_player_1_Game_Win_Percentage - F_player_2_Game_Win_Percentage,
+    F_BreakPoints_Per_Game_Diff = F_player_1_BreakPoints_Per_Game - F_player_2_BreakPoints_Per_Game,
+    F_Rank_Diff = (F_player_1_Rank - F_player_2_Rank)
+  ) %>%
+  select(player_1, player_2, contains("Diff"))
+
+aus_open_2019_features_womens = draw_player_1_womens %>% 
+  bind_cols(draw_player_2_womens) %>%
   select(player_1, player_2, everything()) %>%
   mutate(
     F_Serve_Win_Ratio_Diff = F_player_1_Serve_Win_Ratio - F_player_2_Serve_Win_Ratio,
@@ -235,6 +351,10 @@ aus_open_2019_features = draw_player_1 %>%
   select(player_1, player_2, contains("Diff"))
 
 
+#########################
+#### Train the model ####
+#########################
+
 ## Setup H2O
 h2o.init(ip = "localhost",
          port = 54321,
@@ -245,36 +365,63 @@ h2o.init(ip = "localhost",
 
 
 ## Sending file to h2o
-train_h2o = feature_matrix_wide %>%
+train_mens_h2o = feature_matrix_wide_mens %>%
   select(contains("Diff"), Winner) %>%
-  as.h2o(destination_frame = "train_h2o")
+  as.h2o(destination_frame = "train_h2o_mens")
 
-aus_open_2019_features_h2o = aus_open_2019_features %>%
+train_womens_h2o = feature_matrix_wide_womens %>%
+  select(contains("Diff"), Winner) %>%
+  as.h2o(destination_frame = "train_h2o_womens")
+
+aus_open_2019_features_mens_h2o = aus_open_2019_features_mens %>%
   select(contains("Diff")) %>%
-  as.h2o(destination_frame = "aus_open_2019_features_h2o")
+  as.h2o(destination_frame = "aus_open_2019_features_h2o_mens")
 
-## Running Auto ML 
+aus_open_2019_features_womens_h2o = aus_open_2019_features_womens %>%
+  select(contains("Diff")) %>%
+  as.h2o(destination_frame = "aus_open_2019_features_h2o_womens")
+
+## Run Auto ML 
 mens_model = h2o.automl(y = "Winner",
-                        training_frame = train_h2o,
-                        max_runtime_secs = 30,
-                        max_models = 100,
-                        stopping_metric = "logloss",
-                        sort_metric = "logloss",
-                        balance_classes = TRUE,
-                        seed = 183) # Set seed to replicate results - 183 is the most games played in a tennis match (Isner-Mahut)
+                          training_frame = train_mens_h2o,
+                          max_runtime_secs = 300,
+                          max_models = 100,
+                          stopping_metric = "logloss",
+                          sort_metric = "logloss",
+                          balance_classes = TRUE,
+                          seed = 183) # Set seed to replicate results - 183 is the most games played in a tennis match (Isner-Mahut)
+
+womens_model = h2o.automl(y = "Winner",
+                          training_frame = train_womens_h2o,
+                          max_runtime_secs = 300,
+                          max_models = 100,
+                          stopping_metric = "logloss",
+                          sort_metric = "logloss",
+                          balance_classes = TRUE,
+                          seed = 183) # Set seed to replicate results - 183 is the most games played in a tennis match (Isner-Mahut)
 
 ## Predictions on test frame
-predictions = h2o.predict(mens_model@leader, aus_open_2019_features_h2o) %>%
+mens_predictions = h2o.predict(mens_model@leader, aus_open_2019_features_mens_h2o) %>%
+  as.data.frame()
+
+womens_predictions = h2o.predict(womens_model@leader, aus_open_2019_features_womens_h2o) %>%
   as.data.frame()
 
 # Add predictions to the df
-aus_open_2019_features$prob_player_1 = predictions$p1
+aus_open_2019_features_mens$player_1_win_probability = mens_predictions$p1
+aus_open_2019_features_womens$player_1_win_probability = womens_predictions$p1
 
-# Show the top 5 players according to their win prediction probability
-aus_open_2019_features %>% 
-  select(-player_2) %>%
-  group_by(player_1) %>%
-  summarise_all(mean) %>%
-  arrange(desc(prob_player_1)) %>%
-  head() %>%
-  print()
+# Create submission df
+mens_submission = aus_open_2019_features_mens %>%
+  select(player_1,
+         player_2,
+         player_1_win_probability)
+
+womens_submission = aus_open_2019_features_womens %>%
+  select(player_1,
+         player_2,
+         player_1_win_probability)
+
+# Export to CSV - this is the submission file!
+mens_submission %>% write_csv("submission/datathon_submission_mens_YOUR-PLAYER-ID.csv")
+womens_submission %>% write_csv("submission/datathon_submission_womens_YOUR-PLAYER-ID.csv")

@@ -10,6 +10,8 @@ output: html_document
 ### The Task
 This notebook will outline how the Betfair Data Scientists went about modelling the Australian Open for Betfair's Australian Open Datathon. The task is simple: we ask you to predict the winner of every possible Australian Open matchup using data which we provide.
 
+Note that this notebook will only outline the process for predicting the mens tournament, but to enter a valid submission to the tournament you must submit both a mens and womens submissions.
+
 The metric used to determine the winner will be log loss, based on the actual matchups that happen in the Open. For more information on log loss, click [here](http://wiki.fast.ai/index.php/Log_Loss).
 
 For a detailed outline of the task, the prizes, and to sign up, click [here](https://www.betfair.com.au/hub/australian-open-datathon/).
@@ -57,7 +59,7 @@ library(purrr)
 library(h2o)
 library(DT)
 
-mens = readr::read_csv('data/ATP_matches.csv', na = ".") # NAs are indicated by .
+mens = readr::read_csv('data/ATP_matches_Jan_10.csv', na = ".") # NAs are indicated by .
 
 mens %>%
   datatable(rownames = FALSE, extensions = 'Scroller', 
@@ -114,7 +116,7 @@ split_winner_loser_columns <- function(df) {
 
 ```{r message=FALSE, warning=FALSE}
 # Read in men and womens data; randomise the data to avoid result leakage
-mens = readr::read_csv('data/ATP_matches.csv', na = ".") %>%
+mens = readr::read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
   filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>% # Filter to only use hardcourt games
   mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
          Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
@@ -308,7 +310,7 @@ As we can see, the dummy submission file contains every potential match up for t
 unique_players = read_csv('data/men_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
 
 # Get the last 15 games played for each unique player and find their features
-lookup_feature_table = read_csv('data/ATP_matches.csv', na = ".") %>%
+lookup_feature_table = read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
   filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
   mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
          Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
@@ -431,4 +433,20 @@ aus_open_2019_features %>%
                           scrollX = 600,
                           fixedColumns = TRUE)) %>%
   formatRound(columns=pluck(., "x", "data") %>% colnames(), digits=3)
+```
+
+Finally, let's create our submissions file.
+```{r}
+# Create submission df
+mens_submission = aus_open_2019_features %>%
+  select(player_1,
+         player_2,
+         player_1_win_probability = prob_player_1) # Make sure these columns have the same name
+
+
+# Export to CSV - this is the submission file!
+mens_submission %>% write_csv("submission/datathon_submission_mens_YOUR-PLAYER-ID.csv")
+
+# You must also submit a womens submission - here it is commented out
+# womens_submission %>% write_csv("submission/datathon_submission_womens_YOUR-PLAYER-ID.csv")
 ```
