@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Betfair Data Scientists' Australian Open Model</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>python-machine-learning-walkthrough</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11897,8 +11897,8 @@ i.e. player_1,player_2,probability_of_player_1_winning,</li>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># We are loading both the mens and womens match csvs</span>
-<span class="n">df_atp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/ATP_matches.csv&quot;</span><span class="p">)</span>
-<span class="n">df_wta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/WTA_matches.csv&quot;</span><span class="p">)</span>
+<span class="n">df_atp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/ATP_matches_Jan_10.csv&quot;</span><span class="p">)</span>
+<span class="n">df_wta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/WTA_matches_Jan_10.csv&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11990,7 +11990,7 @@ i.e. player_1,player_2,probability_of_player_1_winning,</li>
 <ol>
 <li>Convert the raw dataframes into long format:</li>
 </ol>
-<p><img src="images/winner_loser.png"></p>
+<p><img src="images\winner_loser.png"></p>
 <ol>
 <li>Create some new features</li>
 </ol>
@@ -12948,8 +12948,8 @@ i.e. player_1,player_2,probability_of_player_1_winning,</li>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>After shuffling, the win rate for player 1 for the mens is 49.64798919857267%
-After shuffling, the win rate for player 1 for the womens is 49.697671426733564%
+<pre>After shuffling, the win rate for player 1 for the mens is 49.55566172957477%
+After shuffling, the win rate for player 1 for the womens is 49.783329084884016%
 </pre>
 </div>
 </div>
@@ -13044,8 +13044,8 @@ After shuffling, the win rate for player 1 for the womens is 49.697671426733564%
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>59 player_1s do Not have previous match history before the tournament
-56 player_2s do Not have previous match history before the tournament
+<pre>64 player_1s do Not have previous match history before the tournament
+54 player_2s do Not have previous match history before the tournament
 </pre>
 </div>
 </div>
@@ -13078,8 +13078,8 @@ After shuffling, the win rate for player 1 for the womens is 49.697671426733564%
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>41 player_1s do Not have previous match history before the tournament
-37 player_2s do Not have previous match history before the tournament
+<pre>40 player_1s do Not have previous match history before the tournament
+45 player_2s do Not have previous match history before the tournament
 </pre>
 </div>
 </div>
@@ -13113,13 +13113,15 @@ After shuffling, the win rate for player 1 for the womens is 49.697671426733564%
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2014-01-13    29
-2014-08-25     7
-2015-08-31     5
+<pre>2014-01-13    26
+2014-08-25     8
+2015-08-31     4
 2015-01-19     3
-2017-08-28     3
-2018-01-15     3
 2018-08-27     3
+2018-01-15     2
+2017-01-16     1
+2017-08-28     1
+2016-08-29     1
 Name: Tournament_Date, dtype: int64</pre>
 </div>
 
@@ -13155,16 +13157,16 @@ Name: Tournament_Date, dtype: int64</pre>
 <div class="output_text output_subarea output_execute_result">
 <pre>2012-01-16    29
 2012-08-27     9
-2014-01-13     5
-2013-08-26     5
-2016-01-18     5
-2013-01-14     4
-2014-08-25     3
-2018-01-15     3
-2017-08-28     3
-2018-08-27     2
+2013-01-14     6
+2014-08-25     5
+2018-01-15     5
+2017-08-28     5
+2014-01-13     4
+2013-08-26     4
+2016-01-18     2
 2016-08-29     2
 2015-01-19     1
+2018-08-27     1
 Name: Tournament_Date, dtype: int64</pre>
 </div>
 
@@ -13678,7 +13680,7 @@ Name: Tournament_Date, dtype: int64</pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">h2o</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
@@ -13721,7 +13723,15 @@ Name: Tournament_Date, dtype: int64</pre>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Checking whether there is an H2O instance running at http://localhost:54321. connected.
+<pre>Checking whether there is an H2O instance running at http://localhost:54321..... not found.
+Attempting to start a local H2O server...
+; Java HotSpot(TM) 64-Bit Server VM 18.9 (build 11.0.1+13-LTS, mixed mode)
+  Starting server from C:\Users\TanQ\AppData\Local\Continuum\anaconda3\lib\site-packages\h2o\backend\bin\h2o.jar
+  Ice root: C:\Users\TanQ\AppData\Local\Temp\tmpgfj2upnv
+  JVM stdout: C:\Users\TanQ\AppData\Local\Temp\tmpgfj2upnv\h2o_TanQ_started_from_python.out
+  JVM stderr: C:\Users\TanQ\AppData\Local\Temp\tmpgfj2upnv\h2o_TanQ_started_from_python.err
+  Server is running at http://127.0.0.1:54321
+Connecting to H2O server at http://127.0.0.1:54321... successful.
 </pre>
 </div>
 </div>
@@ -13734,7 +13744,7 @@ Name: Tournament_Date, dtype: int64</pre>
 
 <div class="output_html rendered_html output_subarea ">
 <div style="overflow:auto"><table style="width:50%"><tr><td>H2O cluster uptime:</td>
-<td>2 days 0 hours 43 mins</td></tr>
+<td>01 secs</td></tr>
 <tr><td>H2O cluster timezone:</td>
 <td>Australia/Hobart</td></tr>
 <tr><td>H2O data parsing timezone:</td>
@@ -13742,21 +13752,21 @@ Name: Tournament_Date, dtype: int64</pre>
 <tr><td>H2O cluster version:</td>
 <td>3.22.0.2</td></tr>
 <tr><td>H2O cluster version age:</td>
-<td>29 days </td></tr>
+<td>1 month and 19 days </td></tr>
 <tr><td>H2O cluster name:</td>
-<td>H2O_from_python_TanQ_qi7199</td></tr>
+<td>H2O_from_python_TanQ_vzrjra</td></tr>
 <tr><td>H2O cluster total nodes:</td>
 <td>1</td></tr>
 <tr><td>H2O cluster free memory:</td>
-<td>6.120 Gb</td></tr>
+<td>7.975 Gb</td></tr>
 <tr><td>H2O cluster total cores:</td>
 <td>4</td></tr>
 <tr><td>H2O cluster allowed cores:</td>
 <td>4</td></tr>
 <tr><td>H2O cluster status:</td>
-<td>locked, healthy</td></tr>
+<td>accepting new members, healthy</td></tr>
 <tr><td>H2O connection url:</td>
-<td>http://localhost:54321</td></tr>
+<td>http://127.0.0.1:54321</td></tr>
 <tr><td>H2O connection proxy:</td>
 <td>None</td></tr>
 <tr><td>H2O internal security:</td>
@@ -13794,16 +13804,16 @@ AutoML progress: |████████████████████�
 <tr><th>model_id                                           </th><th style="text-align: right;">     auc</th><th style="text-align: right;">  logloss</th><th style="text-align: right;">  mean_per_class_error</th><th style="text-align: right;">    rmse</th><th style="text-align: right;">     mse</th></tr>
 </thead>
 <tbody>
-<tr><td>GBM_5_AutoML_20181221_094949                       </td><td style="text-align: right;">0.790281</td><td style="text-align: right;"> 0.554852</td><td style="text-align: right;">              0.281363</td><td style="text-align: right;">0.431379</td><td style="text-align: right;">0.186088</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_15         </td><td style="text-align: right;">0.789329</td><td style="text-align: right;"> 0.556804</td><td style="text-align: right;">              0.29856 </td><td style="text-align: right;">0.431931</td><td style="text-align: right;">0.186564</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_7          </td><td style="text-align: right;">0.788013</td><td style="text-align: right;"> 0.557808</td><td style="text-align: right;">              0.295899</td><td style="text-align: right;">0.432968</td><td style="text-align: right;">0.187461</td></tr>
-<tr><td>StackedEnsemble_BestOfFamily_AutoML_20181221_094949</td><td style="text-align: right;">0.788131</td><td style="text-align: right;"> 0.558028</td><td style="text-align: right;">              0.285321</td><td style="text-align: right;">0.432849</td><td style="text-align: right;">0.187358</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_20         </td><td style="text-align: right;">0.785633</td><td style="text-align: right;"> 0.561094</td><td style="text-align: right;">              0.283932</td><td style="text-align: right;">0.43479 </td><td style="text-align: right;">0.189043</td></tr>
-<tr><td>StackedEnsemble_AllModels_AutoML_20181221_094949   </td><td style="text-align: right;">0.784411</td><td style="text-align: right;"> 0.561587</td><td style="text-align: right;">              0.293244</td><td style="text-align: right;">0.434667</td><td style="text-align: right;">0.188935</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_25         </td><td style="text-align: right;">0.785311</td><td style="text-align: right;"> 0.561783</td><td style="text-align: right;">              0.291912</td><td style="text-align: right;">0.434888</td><td style="text-align: right;">0.189127</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_17         </td><td style="text-align: right;">0.774832</td><td style="text-align: right;"> 0.570883</td><td style="text-align: right;">              0.295836</td><td style="text-align: right;">0.439375</td><td style="text-align: right;">0.193051</td></tr>
-<tr><td>DeepLearning_1_AutoML_20181221_094949              </td><td style="text-align: right;">0.779388</td><td style="text-align: right;"> 0.572823</td><td style="text-align: right;">              0.311737</td><td style="text-align: right;">0.438479</td><td style="text-align: right;">0.192264</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_094949_model_14         </td><td style="text-align: right;">0.7718  </td><td style="text-align: right;"> 0.578867</td><td style="text-align: right;">              0.285835</td><td style="text-align: right;">0.441373</td><td style="text-align: right;">0.19481 </td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_7          </td><td style="text-align: right;">0.79358 </td><td style="text-align: right;"> 0.55187 </td><td style="text-align: right;">              0.294155</td><td style="text-align: right;">0.429917</td><td style="text-align: right;">0.184828</td></tr>
+<tr><td>StackedEnsemble_AllModels_AutoML_20190110_144630   </td><td style="text-align: right;">0.792633</td><td style="text-align: right;"> 0.553054</td><td style="text-align: right;">              0.294586</td><td style="text-align: right;">0.430553</td><td style="text-align: right;">0.185376</td></tr>
+<tr><td>GBM_5_AutoML_20190110_144630                       </td><td style="text-align: right;">0.792764</td><td style="text-align: right;"> 0.553125</td><td style="text-align: right;">              0.292082</td><td style="text-align: right;">0.430368</td><td style="text-align: right;">0.185216</td></tr>
+<tr><td>StackedEnsemble_BestOfFamily_AutoML_20190110_144630</td><td style="text-align: right;">0.792094</td><td style="text-align: right;"> 0.554249</td><td style="text-align: right;">              0.298028</td><td style="text-align: right;">0.431262</td><td style="text-align: right;">0.185987</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_20         </td><td style="text-align: right;">0.792157</td><td style="text-align: right;"> 0.555009</td><td style="text-align: right;">              0.301144</td><td style="text-align: right;">0.431583</td><td style="text-align: right;">0.186264</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_15         </td><td style="text-align: right;">0.790473</td><td style="text-align: right;"> 0.555177</td><td style="text-align: right;">              0.294155</td><td style="text-align: right;">0.431075</td><td style="text-align: right;">0.185826</td></tr>
+<tr><td>DeepLearning_grid_1_AutoML_20190110_144630_model_3 </td><td style="text-align: right;">0.786332</td><td style="text-align: right;"> 0.562176</td><td style="text-align: right;">              0.303165</td><td style="text-align: right;">0.434227</td><td style="text-align: right;">0.188553</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_17         </td><td style="text-align: right;">0.781151</td><td style="text-align: right;"> 0.565101</td><td style="text-align: right;">              0.309071</td><td style="text-align: right;">0.436245</td><td style="text-align: right;">0.190309</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_22         </td><td style="text-align: right;">0.783049</td><td style="text-align: right;"> 0.568802</td><td style="text-align: right;">              0.288496</td><td style="text-align: right;">0.436491</td><td style="text-align: right;">0.190524</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_144630_model_14         </td><td style="text-align: right;">0.780263</td><td style="text-align: right;"> 0.570934</td><td style="text-align: right;">              0.308941</td><td style="text-align: right;">0.437651</td><td style="text-align: right;">0.191539</td></tr>
 </tbody>
 </table>
 </div>
@@ -13812,7 +13822,7 @@ AutoML progress: |████████████████████�
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[30]:</div>
+<div class="prompt output_prompt">Out[28]:</div>
 
 
 
@@ -13837,7 +13847,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Convert to an h2o frame</span>
@@ -13897,16 +13907,16 @@ AutoML progress: |████████████████████�
 <tr><th>model_id                                           </th><th style="text-align: right;">     auc</th><th style="text-align: right;">  logloss</th><th style="text-align: right;">  mean_per_class_error</th><th style="text-align: right;">    rmse</th><th style="text-align: right;">     mse</th></tr>
 </thead>
 <tbody>
-<tr><td>StackedEnsemble_AllModels_AutoML_20181221_095400   </td><td style="text-align: right;">0.726046</td><td style="text-align: right;"> 0.60827 </td><td style="text-align: right;">              0.321222</td><td style="text-align: right;">0.457117</td><td style="text-align: right;">0.208956</td></tr>
-<tr><td>StackedEnsemble_BestOfFamily_AutoML_20181221_095400</td><td style="text-align: right;">0.724911</td><td style="text-align: right;"> 0.609329</td><td style="text-align: right;">              0.337847</td><td style="text-align: right;">0.457659</td><td style="text-align: right;">0.209452</td></tr>
-<tr><td>DeepLearning_grid_1_AutoML_20181221_095400_model_3 </td><td style="text-align: right;">0.729152</td><td style="text-align: right;"> 0.612669</td><td style="text-align: right;">              0.315971</td><td style="text-align: right;">0.45641 </td><td style="text-align: right;">0.20831 </td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_095400_model_7          </td><td style="text-align: right;">0.721204</td><td style="text-align: right;"> 0.615763</td><td style="text-align: right;">              0.336848</td><td style="text-align: right;">0.460885</td><td style="text-align: right;">0.212415</td></tr>
-<tr><td>GBM_5_AutoML_20181221_095400                       </td><td style="text-align: right;">0.719252</td><td style="text-align: right;"> 0.616535</td><td style="text-align: right;">              0.319179</td><td style="text-align: right;">0.461055</td><td style="text-align: right;">0.212572</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_095400_model_15         </td><td style="text-align: right;">0.715921</td><td style="text-align: right;"> 0.619263</td><td style="text-align: right;">              0.318673</td><td style="text-align: right;">0.462215</td><td style="text-align: right;">0.213643</td></tr>
-<tr><td>GLM_grid_1_AutoML_20181221_095400_model_1          </td><td style="text-align: right;">0.726048</td><td style="text-align: right;"> 0.622989</td><td style="text-align: right;">              0.366124</td><td style="text-align: right;">0.463099</td><td style="text-align: right;">0.214461</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_095400_model_17         </td><td style="text-align: right;">0.709261</td><td style="text-align: right;"> 0.624902</td><td style="text-align: right;">              0.34876 </td><td style="text-align: right;">0.465628</td><td style="text-align: right;">0.216809</td></tr>
-<tr><td>GBM_grid_1_AutoML_20181221_095400_model_18         </td><td style="text-align: right;">0.70946 </td><td style="text-align: right;"> 0.625704</td><td style="text-align: right;">              0.393556</td><td style="text-align: right;">0.466147</td><td style="text-align: right;">0.217293</td></tr>
-<tr><td>DeepLearning_grid_1_AutoML_20181221_095400_model_2 </td><td style="text-align: right;">0.713419</td><td style="text-align: right;"> 0.628008</td><td style="text-align: right;">              0.311334</td><td style="text-align: right;">0.463638</td><td style="text-align: right;">0.21496 </td></tr>
+<tr><td>StackedEnsemble_AllModels_AutoML_20190110_145009   </td><td style="text-align: right;">0.725085</td><td style="text-align: right;"> 0.611108</td><td style="text-align: right;">              0.316398</td><td style="text-align: right;">0.458639</td><td style="text-align: right;">0.21035 </td></tr>
+<tr><td>StackedEnsemble_BestOfFamily_AutoML_20190110_145009</td><td style="text-align: right;">0.723817</td><td style="text-align: right;"> 0.612013</td><td style="text-align: right;">              0.316447</td><td style="text-align: right;">0.459125</td><td style="text-align: right;">0.210795</td></tr>
+<tr><td>DeepLearning_grid_1_AutoML_20190110_145009_model_3 </td><td style="text-align: right;">0.727124</td><td style="text-align: right;"> 0.613313</td><td style="text-align: right;">              0.356441</td><td style="text-align: right;">0.45889 </td><td style="text-align: right;">0.21058 </td></tr>
+<tr><td>GBM_5_AutoML_20190110_145009                       </td><td style="text-align: right;">0.724791</td><td style="text-align: right;"> 0.614527</td><td style="text-align: right;">              0.331396</td><td style="text-align: right;">0.460075</td><td style="text-align: right;">0.211669</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_145009_model_15         </td><td style="text-align: right;">0.722316</td><td style="text-align: right;"> 0.617107</td><td style="text-align: right;">              0.351442</td><td style="text-align: right;">0.461271</td><td style="text-align: right;">0.212771</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_145009_model_7          </td><td style="text-align: right;">0.721326</td><td style="text-align: right;"> 0.617139</td><td style="text-align: right;">              0.350479</td><td style="text-align: right;">0.461776</td><td style="text-align: right;">0.213237</td></tr>
+<tr><td>DeepLearning_1_AutoML_20190110_145009              </td><td style="text-align: right;">0.729067</td><td style="text-align: right;"> 0.617782</td><td style="text-align: right;">              0.296235</td><td style="text-align: right;">0.460242</td><td style="text-align: right;">0.211822</td></tr>
+<tr><td>DeepLearning_grid_1_AutoML_20190110_145009_model_2 </td><td style="text-align: right;">0.723635</td><td style="text-align: right;"> 0.622487</td><td style="text-align: right;">              0.294222</td><td style="text-align: right;">0.461061</td><td style="text-align: right;">0.212577</td></tr>
+<tr><td>GLM_grid_1_AutoML_20190110_145009_model_1          </td><td style="text-align: right;">0.725799</td><td style="text-align: right;"> 0.624144</td><td style="text-align: right;">              0.342348</td><td style="text-align: right;">0.463899</td><td style="text-align: right;">0.215202</td></tr>
+<tr><td>GBM_grid_1_AutoML_20190110_145009_model_17         </td><td style="text-align: right;">0.706836</td><td style="text-align: right;"> 0.627602</td><td style="text-align: right;">              0.345334</td><td style="text-align: right;">0.466932</td><td style="text-align: right;">0.218026</td></tr>
 </tbody>
 </table>
 </div>
@@ -13915,7 +13925,7 @@ AutoML progress: |████████████████████�
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[31]:</div>
+<div class="prompt output_prompt">Out[29]:</div>
 
 
 
@@ -13941,7 +13951,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df_predict_atp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data/men_dummy_submission_file.csv&quot;</span><span class="p">)</span>
@@ -13955,7 +13965,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df_predict_wta</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -13971,7 +13981,7 @@ AutoML progress: |████████████████████�
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[33]:</div>
+<div class="prompt output_prompt">Out[31]:</div>
 
 
 
@@ -14034,7 +14044,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Before we join the features by the names and the dates, we need to convert any non-english characters to english first</span>
@@ -14080,7 +14090,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># create and tournament date column and set it to 2019 so we can join the lastest features</span>
@@ -14113,7 +14123,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df_predict_atp</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -14129,7 +14139,7 @@ AutoML progress: |████████████████████�
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[36]:</div>
+<div class="prompt output_prompt">Out[34]:</div>
 
 
 
@@ -14180,11 +14190,11 @@ AutoML progress: |████████████████████�
       <td>0.5</td>
       <td>2019-01-15</td>
       <td>novak djokovic</td>
-      <td>0.685903</td>
-      <td>0.426066</td>
-      <td>0.42378</td>
-      <td>0.640857</td>
-      <td>2.0</td>
+      <td>0.677222</td>
+      <td>0.415615</td>
+      <td>0.37565</td>
+      <td>0.621408</td>
+      <td>1.0</td>
       <td>2019-01-15</td>
       <td>rafael nadal</td>
       <td>0.622425</td>
@@ -14201,17 +14211,17 @@ AutoML progress: |████████████████████�
       <td>0.5</td>
       <td>2019-01-15</td>
       <td>novak djokovic</td>
-      <td>0.685903</td>
-      <td>0.426066</td>
-      <td>0.42378</td>
-      <td>0.640857</td>
-      <td>2.0</td>
+      <td>0.677222</td>
+      <td>0.415615</td>
+      <td>0.37565</td>
+      <td>0.621408</td>
+      <td>1.0</td>
       <td>2019-01-15</td>
       <td>roger federer</td>
-      <td>0.620070</td>
-      <td>0.389781</td>
-      <td>0.269224</td>
-      <td>0.564244</td>
+      <td>0.626582</td>
+      <td>0.374357</td>
+      <td>0.258474</td>
+      <td>0.553994</td>
       <td>3.0</td>
       <td>2019-01-15</td>
     </tr>
@@ -14228,7 +14238,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># How many players do not have previous match history</span>
@@ -14250,8 +14260,8 @@ AutoML progress: |████████████████████�
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>3 player_1s do Not have previous match history before the tournament in the mens
-3 player_2s do Not have previous match history before the tournament in the mens
+<pre>2 player_1s do Not have previous match history before the tournament in the mens
+2 player_2s do Not have previous match history before the tournament in the mens
 </pre>
 </div>
 </div>
@@ -14262,7 +14272,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># How many players do not have previous match history</span>
@@ -14296,7 +14306,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df_predict_atp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_predict_atp</span><span class="o">.</span><span class="n">Player_p1</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span><span class="s1">&#39;player_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
@@ -14316,7 +14326,7 @@ AutoML progress: |████████████████████�
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;christian garin&#39;, &#39;pedro sousa&#39;, &#39;hugo dellien&#39;]
+<pre>[&#39;christian garin&#39;, &#39;hugo dellien&#39;]
 </pre>
 </div>
 </div>
@@ -14327,7 +14337,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df_predict_wta</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_predict_wta</span><span class="o">.</span><span class="n">Player_p1</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span><span class="s1">&#39;player_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
@@ -14367,7 +14377,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Apply the function and get the difference between player 1 and 2</span>
@@ -14390,7 +14400,7 @@ AutoML progress: |████████████████████�
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df_predict_atp_h2o</span> <span class="o">=</span> <span class="n">h2o</span><span class="o">.</span><span class="n">H2OFrame</span><span class="p">(</span><span class="n">df_predict_atp</span><span class="p">[</span><span class="n">feats</span><span class="p">])</span>
@@ -14431,7 +14441,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span> <span class="o">=</span> <span class="n">df_predict_atp</span><span class="p">[[</span><span class="s1">&#39;player_1&#39;</span><span class="p">,</span><span class="s1">&#39;player_2&#39;</span><span class="p">,</span><span class="s1">&#39;player_1_win_probability&#39;</span><span class="p">]]</span>
@@ -14445,7 +14455,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -14461,7 +14471,7 @@ stackedensemble prediction progress: |██████████████
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[44]:</div>
+<div class="prompt output_prompt">Out[42]:</div>
 
 
 
@@ -14494,31 +14504,31 @@ stackedensemble prediction progress: |██████████████
       <th>0</th>
       <td>novak djokovic</td>
       <td>rafael nadal</td>
-      <td>0.571588</td>
+      <td>0.606573</td>
     </tr>
     <tr>
       <th>1</th>
       <td>novak djokovic</td>
       <td>roger federer</td>
-      <td>0.662511</td>
+      <td>0.666145</td>
     </tr>
     <tr>
       <th>2</th>
       <td>novak djokovic</td>
       <td>juan martin del potro</td>
-      <td>0.544306</td>
+      <td>0.610896</td>
     </tr>
     <tr>
       <th>3</th>
       <td>novak djokovic</td>
       <td>alexander zverev</td>
-      <td>0.709483</td>
+      <td>0.700163</td>
     </tr>
     <tr>
       <th>4</th>
       <td>novak djokovic</td>
       <td>kevin anderson</td>
-      <td>0.687195</td>
+      <td>0.704217</td>
     </tr>
   </tbody>
 </table>
@@ -14533,7 +14543,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">wta_submission</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
@@ -14549,7 +14559,7 @@ stackedensemble prediction progress: |██████████████
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[45]:</div>
+<div class="prompt output_prompt">Out[43]:</div>
 
 
 
@@ -14582,31 +14592,31 @@ stackedensemble prediction progress: |██████████████
       <th>0</th>
       <td>simona halep</td>
       <td>angelique kerber</td>
-      <td>0.455224</td>
+      <td>0.468798</td>
     </tr>
     <tr>
       <th>1</th>
       <td>simona halep</td>
       <td>caroline wozniacki</td>
-      <td>0.546276</td>
+      <td>0.355808</td>
     </tr>
     <tr>
       <th>2</th>
       <td>simona halep</td>
       <td>elina svitolina</td>
-      <td>0.408014</td>
+      <td>0.465355</td>
     </tr>
     <tr>
       <th>3</th>
       <td>simona halep</td>
       <td>naomi osaka</td>
-      <td>0.285125</td>
+      <td>0.337197</td>
     </tr>
     <tr>
       <th>4</th>
       <td>simona halep</td>
       <td>sloane stephens</td>
-      <td>0.576643</td>
+      <td>0.553706</td>
     </tr>
   </tbody>
 </table>
@@ -14630,7 +14640,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;player_1&#39;</span><span class="p">)[</span><span class="s1">&#39;player_1_win_probability&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> \
@@ -14647,7 +14657,7 @@ stackedensemble prediction progress: |██████████████
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[46]:</div>
+<div class="prompt output_prompt">Out[49]:</div>
 
 
 
@@ -14678,27 +14688,27 @@ stackedensemble prediction progress: |██████████████
     <tr>
       <th>92</th>
       <td>novak djokovic</td>
-      <td>0.846377</td>
-    </tr>
-    <tr>
-      <th>60</th>
-      <td>juan martin del potro</td>
-      <td>0.787337</td>
+      <td>0.832184</td>
     </tr>
     <tr>
       <th>61</th>
       <td>karen khachanov</td>
-      <td>0.782963</td>
+      <td>0.806853</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>juan martin del potro</td>
+      <td>0.797437</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>kei nishikori</td>
+      <td>0.796302</td>
     </tr>
     <tr>
       <th>103</th>
       <td>rafael nadal</td>
-      <td>0.778707</td>
-    </tr>
-    <tr>
-      <th>111</th>
-      <td>roger federer</td>
-      <td>0.767337</td>
+      <td>0.776907</td>
     </tr>
   </tbody>
 </table>
@@ -14713,7 +14723,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">wta_submission</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;player_1&#39;</span><span class="p">)[</span><span class="s1">&#39;player_1_win_probability&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> \
@@ -14730,7 +14740,7 @@ stackedensemble prediction progress: |██████████████
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[47]:</div>
+<div class="prompt output_prompt">Out[52]:</div>
 
 
 
@@ -14759,29 +14769,29 @@ stackedensemble prediction progress: |██████████████
   </thead>
   <tbody>
     <tr>
-      <th>71</th>
-      <td>madison keys</td>
-      <td>0.750580</td>
-    </tr>
-    <tr>
       <th>87</th>
       <td>naomi osaka</td>
-      <td>0.749195</td>
+      <td>0.731958</td>
     </tr>
     <tr>
-      <th>28</th>
-      <td>caroline wozniacki</td>
-      <td>0.722409</td>
+      <th>55</th>
+      <td>julia goerges</td>
+      <td>0.721631</td>
     </tr>
     <tr>
-      <th>61</th>
-      <td>kiki bertens</td>
-      <td>0.713904</td>
+      <th>20</th>
+      <td>ashleigh barty</td>
+      <td>0.718204</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>madison keys</td>
+      <td>0.706865</td>
     </tr>
     <tr>
       <th>19</th>
       <td>aryna sabalenka</td>
-      <td>0.707368</td>
+      <td>0.706603</td>
     </tr>
   </tbody>
 </table>
@@ -14805,11 +14815,11 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;submission/atp_submission_python.csv&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">wta_submission</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;submission/wta_submission_pthon.csv&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;submission/datathon_submission_mens_YOUR-PLAYER-ID.csv&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">wta_submission</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;submission/datathon_submission_womens_YOUR-PLAYER-ID.csv&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14819,7 +14829,7 @@ stackedensemble prediction progress: |██████████████
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">atp_submission</span><span class="o">.</span><span class="n">shape</span>
@@ -14835,7 +14845,7 @@ stackedensemble prediction progress: |██████████████
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[49]:</div>
+<div class="prompt output_prompt">Out[54]:</div>
 
 
 
