@@ -32,6 +32,8 @@ For an outline of our methodoly and thought process, read [this](https://www.bet
 i.e. player_1,player_2,probability_of_player_1_winning,
 * Submissions must be in a csv format
 * Only two models will be accepted per participant (one model for the men's draw, one model for the women's draw)
+* You will receive an email upon registration with your player ID, which is to be used in your file name to identify it as your model
+* Submissions must follow the prescribed naming convention: datathon_submission_mens_playerID.csv and datathon_submission_womens_playerID.csv, where playerID is your unique player ID
 
 ## Tutorials
 The follow tutorials will walk you through the full process from exploring the data, to creating features, to finally modelling the problem. The tutorials are written in both R and Python
