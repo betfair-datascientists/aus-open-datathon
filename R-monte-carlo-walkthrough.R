@@ -8,7 +8,7 @@ library(glue)
 # Load the data -----------------------------------------------------------
 
 # Read CSV
-mens = read_csv("ATP_matches.csv", na = ".")
+mens = read_csv("ATP_matches_Jan_10.csv", na = ".")
 
 # Clean names
 mens = mens %>% clean_names()
@@ -489,7 +489,7 @@ LogLoss(
 # Simluate all matchups for 2019 Aus Open -----------------------------------------------------------
 
 # Getting womens data
-womens = read_csv("WTA_matches.csv", na = ".")
+womens = read_csv("WTA_matches_Jan_10.csv", na = ".")
 womens = womens %>% clean_names()
 
 # Next we'll use the dummy files to make predictions for all possible matchups
