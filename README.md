@@ -41,6 +41,7 @@ The follow tutorials will walk you through the full process from exploring the d
 * [R Machine Learning Walkthrough - IPython Notebook - this does render in Github](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/R-machine-learning-walkthrough.ipynb)
 * [Python Machine Learning Walkthrough - IPython Notebook](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/python-machine-learning-walkthrough.ipynb)
 * [Python Machine Learning Walkthrough - HTML file. Note that this does not render in Github](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/python-machine-learning-walkthrough.html)
+* [R Monte Carlo Walkthrough - R Script](https://github.com/betfair-datascientists/aus-open-datathon/blob/master/R-monte-carlo-walkthrough.R)
 
 ## Sample Predictions
 Our average predictions (grouped by player) are below. Note that this is not the format to submit your predictions in.
