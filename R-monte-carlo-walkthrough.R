@@ -68,8 +68,10 @@ point_win_rates =
 
 # Simulation Functions -----------------------------------------------------------
 
-# In the following chunks of code is a whole bunch of lengthy code to simulate a tennis match
-# Most of the code just handles the intracacies of a dennis match (tiebreaks, deuce, set length etc) it's not important to read
+# DESCRIPTION:
+# The following chunks of code is the lengthy logic required to simulate a match
+# The code's broken into the semantic game segments (match, set, game, point)
+# Most of the logic is required to handle the intricacies of a tennis match (tiebreaks, deuce, set length etc) so it's not important to read
 
 # IF YOU DON'T CARE YOU SHOULD HEAD TO LINE 310 to pick back up
 simulate_match = function(serve_win_vec, return_win_vec, sets = 5) {
@@ -285,31 +287,22 @@ check_game_winner = function(gameScore, tiebreak = FALSE) {
     p2 = gameScore$p2
     
     if (tiebreak) {
-        
         if (p1-1 > p2 & p1 >= 7) {
             return(1)
         }
-        
         if (p2-1 > p1 & p2 >= 7) {
             return(-1)
         }
-        
         return(0)
-        
     } else {
-       
         if (p1-1 > p2 & p1 >= 4) {
             return(1)
         }
-        
         if (p2-1 > p1 & p2 >= 4) {
             return(-1)
         }
-        
         return(0)
-        
     }
-    
 }
 
 
@@ -317,7 +310,7 @@ check_game_winner = function(gameScore, tiebreak = FALSE) {
 
 # Welcome back
 
-# Let's try it out
+# Let's try our functions out and simulate a few matches between Roger Federer and Novak Djokovic
 player_1 = "Roger Federer"
 player_2 = "Novak Djokovic"
 
@@ -343,7 +336,7 @@ print(glue("Roger's win prob: {(p1_win_vector %>% mean()) * 100 %>% round()} %")
 
 # Create helpful functions -----------------------------------------------------------
 
-# We'll create this wrapper so it's more easy to execute a two player simulation like above
+# We'll create this wrapper so it's more easy to execute a two player simulation like the one we did above
 simulate_matchup = function(winRates, player_1, player_2, number_of_sims = 400) {
     
     # Missing player?
@@ -373,7 +366,7 @@ simulate_matchup = function(winRates, player_1, player_2, number_of_sims = 400) 
     
 }
 
-# We'll create this wrapper so it's more easy to calculate some custom point winrates for men's and women's dataframes
+# We'll create another wrapper so it's more easy to calculate some custom point winrates for men's and women's dataframes
 calculate_player_winrates = function(rawdf, tournament_name = NULL, year = NULL, years_before = 1) {
     
     # Data Attributes for the winner of a match
@@ -503,7 +496,7 @@ womens = womens %>% clean_names()
 women_file = read_csv("women_dummy_submission_file.csv")
 men_file = read_csv("men_dummy_submission_file.csv")
 
-# Given how long a simulation takes we'll just run 10 sims each but if you were doing this really you'd want to run 1000 or more and optimise you're code a little
+# Given how long a simulation takes we'll just run 10 sims each but if you were doing this really you'd want to run 1000 or more and optimise your code a little
 
 # ++++++
 # Womens
