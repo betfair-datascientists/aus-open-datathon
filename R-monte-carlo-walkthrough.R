@@ -539,7 +539,7 @@ mens_predictions=
         player_1_win_prob = future_pmap_dbl(
             .l = list(player_1, player_2),
             .f = function(player_1, player_2) {
-                simulate_matchup(womens_winrates, player_1, player_2, number_of_sims = 10)
+                simulate_matchup(mens_winrates, player_1, player_2, number_of_sims = 10)
             }
         )
     )
