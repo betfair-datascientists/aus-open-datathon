@@ -245,11 +245,11 @@ feature_matrix_wide_womens = aus_us_open_results_womens %>%
 # Let's create features for both men and women using the past 15 games that they have played
 
 # Get the last 15 games played for each unique player
-unique_players_mens = read_csv('data/men_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
-unique_players_womens = read_csv('data/women_dummy_submission_file.csv') %>% pull(player_1) %>% unique()
+unique_players_mens = read_csv('data/men_final_submission_file.csv') %>% pull(player_1) %>% unique()
+unique_players_womens = read_csv('data/women_final_submission_file.csv') %>% pull(player_1) %>% unique()
 
 # Create a feature table for both mens and womens
-lookup_feature_table_mens = read_csv('data/ATP_matches_Jan_10.csv.csv', na = ".") %>%
+lookup_feature_table_mens = read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
   filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
   mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
          Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
@@ -288,7 +288,7 @@ lookup_feature_table_womens = read_csv('data/WTA_matches_Jan_10.csv', na = ".") 
 
 
 # Create a feature matrix for all the player_1s by joining to the lookup feature table on name
-draw_player_1_mens = read_csv('data/men_dummy_submission_file.csv') %>%
+draw_player_1_mens = read_csv('data/men_final_submission_file.csv') %>%
   select(player_1) %>%
   inner_join(lookup_feature_table_mens, by=c("player_1" = "Player")) %>%
   rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
@@ -297,7 +297,7 @@ draw_player_1_mens = read_csv('data/men_dummy_submission_file.csv') %>%
          F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
          F_player_1_Rank = F_Player_Rank)
 
-draw_player_1_womens = read_csv('data/women_dummy_submission_file.csv') %>%
+draw_player_1_womens = read_csv('data/women_final_submission_file.csv') %>%
   select(player_1) %>%
   inner_join(lookup_feature_table_womens, by=c("player_1" = "Player")) %>%
   rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
@@ -307,7 +307,7 @@ draw_player_1_womens = read_csv('data/women_dummy_submission_file.csv') %>%
          F_player_1_Rank = F_Player_Rank)
 
 # Create a feature matrix for all the player_2s by joining to the lookup feature table on name
-draw_player_2_mens = read_csv('data/men_dummy_submission_file.csv') %>%
+draw_player_2_mens = read_csv('data/men_final_submission_file.csv') %>%
   select(player_2) %>%
   inner_join(lookup_feature_table_mens, by=c("player_2" = "Player")) %>%
   rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
@@ -316,7 +316,7 @@ draw_player_2_mens = read_csv('data/men_dummy_submission_file.csv') %>%
          F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
          F_player_2_Rank = F_Player_Rank)
 
-draw_player_2_womens = read_csv('data/women_dummy_submission_file.csv') %>%
+draw_player_2_womens = read_csv('data/women_final_submission_file.csv') %>%
   select(player_2) %>%
   inner_join(lookup_feature_table_womens, by=c("player_2" = "Player")) %>%
   rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
