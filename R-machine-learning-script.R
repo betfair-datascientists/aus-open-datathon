@@ -150,7 +150,7 @@ mens = readr::read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
   ) %>%
   ungroup()
 
-womens = readr::read_csv('data/WTA_data_Jan_10.csv', na = ".") %>%
+womens = readr::read_csv('data/WTA_matches_Jan_10.csv', na = ".") %>%
   filter(Court_Surface == "Hard" | Court_Surface == "Indoor Hard") %>%
   mutate(Match_Id = row_number(), # Add a match ID column to be used as a key
          Tournament_Date = dmy(Tournament_Date), # Change Tournament to datetime
@@ -245,8 +245,10 @@ feature_matrix_wide_womens = aus_us_open_results_womens %>%
 # Let's create features for both men and women using the past 15 games that they have played
 
 # Get the last 15 games played for each unique player
-unique_players_mens = read_csv('data/men_final_submission_file.csv') %>% pull(player_1) %>% unique()
-unique_players_womens = read_csv('data/women_final_submission_file.csv') %>% pull(player_1) %>% unique()
+unique_players_mens = c(read_csv('data/men_final_submission_file.csv') %>% pull(player_1),
+                                read_csv('data/men_final_submission_file.csv') %>% pull(player_2)) %>% unique()
+unique_players_womens = c(read_csv('data/women_final_submission_file.csv') %>% pull(player_1),
+                          read_csv('data/women_final_submission_file.csv') %>% pull(player_2)) %>% unique()
 
 # Create a feature table for both mens and womens
 lookup_feature_table_mens = read_csv('data/ATP_matches_Jan_10.csv', na = ".") %>%
@@ -290,40 +292,69 @@ lookup_feature_table_womens = read_csv('data/WTA_matches_Jan_10.csv', na = ".") 
 # Create a feature matrix for all the player_1s by joining to the lookup feature table on name
 draw_player_1_mens = read_csv('data/men_final_submission_file.csv') %>%
   select(player_1) %>%
-  inner_join(lookup_feature_table_mens, by=c("player_1" = "Player")) %>%
+  left_join(lookup_feature_table_mens, by=c("player_1" = "Player")) %>%
   rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_1_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_1_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
-         F_player_1_Rank = F_Player_Rank)
+         F_player_1_Rank = F_Player_Rank) %>%
+  mutate( # Impute missing data
+    F_player_1_Serve_Win_Ratio = ifelse(is.na(F_player_1_Serve_Win_Ratio), min(F_player_1_Serve_Win_Ratio), F_player_1_Serve_Win_Ratio),
+    F_player_1_Return_Win_Ratio = ifelse(is.na(F_player_1_Return_Win_Ratio), min(F_player_1_Return_Win_Ratio), F_player_1_Return_Win_Ratio),
+    F_player_1_BreakPoints_Per_Game = ifelse(is.na(F_player_1_BreakPoints_Per_Game), min(F_player_1_BreakPoints_Per_Game), F_player_1_BreakPoints_Per_Game),
+    F_player_1_Game_Win_Percentage = ifelse(is.na(F_player_1_Game_Win_Percentage), min(F_player_1_Game_Win_Percentage), F_player_1_Game_Win_Percentage),
+    F_player_1_Rank = ifelse(is.na(F_player_1_Rank), 999, F_player_1_Rank)
+  )
 
 draw_player_1_womens = read_csv('data/women_final_submission_file.csv') %>%
   select(player_1) %>%
-  inner_join(lookup_feature_table_womens, by=c("player_1" = "Player")) %>%
+  left_join(lookup_feature_table_womens, by=c("player_1" = "Player")) %>%
   rename(F_player_1_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_1_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_1_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_1_Game_Win_Percentage = F_Player_Game_Win_Percentage,
-         F_player_1_Rank = F_Player_Rank)
+         F_player_1_Rank = F_Player_Rank) %>%
+  mutate(
+    F_player_1_Serve_Win_Ratio = ifelse(is.na(F_player_1_Serve_Win_Ratio), min(F_player_1_Serve_Win_Ratio), F_player_1_Serve_Win_Ratio),
+    F_player_1_Return_Win_Ratio = ifelse(is.na(F_player_1_Return_Win_Ratio), min(F_player_1_Return_Win_Ratio), F_player_1_Return_Win_Ratio),
+    F_player_1_BreakPoints_Per_Game = ifelse(is.na(F_player_1_BreakPoints_Per_Game), min(F_player_1_BreakPoints_Per_Game), F_player_1_BreakPoints_Per_Game),
+    F_player_1_Game_Win_Percentage = ifelse(is.na(F_player_1_Game_Win_Percentage), min(F_player_1_Game_Win_Percentage), F_player_1_Game_Win_Percentage),
+    F_player_1_Rank = ifelse(is.na(F_player_1_Rank), 999, F_player_1_Rank)
+  )
 
 # Create a feature matrix for all the player_2s by joining to the lookup feature table on name
 draw_player_2_mens = read_csv('data/men_final_submission_file.csv') %>%
   select(player_2) %>%
-  inner_join(lookup_feature_table_mens, by=c("player_2" = "Player")) %>%
+  left_join(lookup_feature_table_mens, by=c("player_2" = "Player")) %>%
   rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_2_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_2_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
-         F_player_2_Rank = F_Player_Rank)
+         F_player_2_Rank = F_Player_Rank) %>%
+  mutate(
+    F_player_2_Serve_Win_Ratio = ifelse(is.na(F_player_2_Serve_Win_Ratio), min(F_player_2_Serve_Win_Ratio), F_player_2_Serve_Win_Ratio),
+    F_player_2_Return_Win_Ratio = ifelse(is.na(F_player_2_Return_Win_Ratio), min(F_player_2_Return_Win_Ratio), F_player_2_Return_Win_Ratio),
+    F_player_2_BreakPoints_Per_Game = ifelse(is.na(F_player_2_BreakPoints_Per_Game), min(F_player_2_BreakPoints_Per_Game), F_player_2_BreakPoints_Per_Game),
+    F_player_2_Game_Win_Percentage = ifelse(is.na(F_player_2_Game_Win_Percentage), min(F_player_2_Game_Win_Percentage), F_player_2_Game_Win_Percentage),
+    F_player_2_Rank = ifelse(is.na(F_player_2_Rank), 999, F_player_2_Rank)
+  )
+
 
 draw_player_2_womens = read_csv('data/women_final_submission_file.csv') %>%
   select(player_2) %>%
-  inner_join(lookup_feature_table_womens, by=c("player_2" = "Player")) %>%
+  left_join(lookup_feature_table_womens, by=c("player_2" = "Player")) %>%
   rename(F_player_2_Serve_Win_Ratio = F_Player_Serve_Win_Ratio,
          F_player_2_Return_Win_Ratio = F_Player_Return_Win_Ratio,
          F_player_2_BreakPoints_Per_Game = F_Player_BreakPoints_Per_Game,
          F_player_2_Game_Win_Percentage = F_Player_Game_Win_Percentage,
-         F_player_2_Rank = F_Player_Rank)
+         F_player_2_Rank = F_Player_Rank) %>%
+  mutate(
+    F_player_2_Serve_Win_Ratio = ifelse(is.na(F_player_2_Serve_Win_Ratio), min(F_player_2_Serve_Win_Ratio), F_player_2_Serve_Win_Ratio),
+    F_player_2_Return_Win_Ratio = ifelse(is.na(F_player_2_Return_Win_Ratio), min(F_player_2_Return_Win_Ratio), F_player_2_Return_Win_Ratio),
+    F_player_2_BreakPoints_Per_Game = ifelse(is.na(F_player_2_BreakPoints_Per_Game), min(F_player_2_BreakPoints_Per_Game), F_player_2_BreakPoints_Per_Game),
+    F_player_2_Game_Win_Percentage = ifelse(is.na(F_player_2_Game_Win_Percentage), min(F_player_2_Game_Win_Percentage), F_player_2_Game_Win_Percentage),
+    F_player_2_Rank = ifelse(is.na(F_player_2_Rank), 999, F_player_2_Rank)
+  )
 
 # Bind the two dfs together and only select the players' names and features (which start with 'F_' for simplicity)
 aus_open_2019_features_mens = draw_player_1_mens %>% 
@@ -384,7 +415,7 @@ aus_open_2019_features_womens_h2o = aus_open_2019_features_womens %>%
 ## Run Auto ML 
 mens_model = h2o.automl(y = "Winner",
                           training_frame = train_mens_h2o,
-                          max_runtime_secs = 300,
+                          max_runtime_secs = 60 * 30,
                           max_models = 100,
                           stopping_metric = "logloss",
                           sort_metric = "logloss",
@@ -393,7 +424,7 @@ mens_model = h2o.automl(y = "Winner",
 
 womens_model = h2o.automl(y = "Winner",
                           training_frame = train_womens_h2o,
-                          max_runtime_secs = 300,
+                          max_runtime_secs = 60 * 30,
                           max_models = 100,
                           stopping_metric = "logloss",
                           sort_metric = "logloss",
@@ -423,5 +454,5 @@ womens_submission = aus_open_2019_features_womens %>%
          player_1_win_probability)
 
 # Export to CSV - this is the submission file!
-mens_submission %>% write_csv("submission/datathon_submission_mens_YOUR-PLAYER-ID.csv")
-womens_submission %>% write_csv("submission/datathon_submission_womens_YOUR-PLAYER-ID.csv")
+mens_submission %>% write_csv("submission/datathon_submission_mens_Betfair_DataScientists_ML_Model.csv")
+womens_submission %>% write_csv("submission/datathon_submission_womens_DataScientists_ML_Model.csv")
