@@ -9,31 +9,7 @@ The metric used to determine the winner will be log loss, based on the actual ma
 
 For a detailed outline of the task, the prizes, and to sign up, click [here](https://www.betfair.com.au/hub/australian-open-datathon/).
 
-For an outline of our methodoly and thought process, read [this](https://www.betfair.com.au/hub/betfairs-aus-open-datathon-how-to-build-a-model/) article.
-
-## Prizes
-|Place|Prize|Place|Prize|
-|-|-|-|-|
-|1|$5000|9|$500|
-|2|$3000|10|$500|
-|3|$2000|11|$200|
-|4|$1000|12|$200|
-|5|$750|13|$200|
-|6|$500|14|$200|
-|7|$500|15|$200|
-|8|$500|Total|$15250|
-
-## Submission
-* To submit your model, email your final submission to datathon@betfair.com.au. Note that you don't need to email your code, just your predictions in the format that we have specified
-* No submissions will be accepted prior to the Australian Open qualifying matches being completed and the final draw list being shared with registered participants (12 January 2019)
-* Submissions need to include all potential match ups during the Australian Open, i.e. all possible combinations for each men's and women's tournaments (this will be provided after the draw is announced and the Australian Open qualifying matches are completed (Jan 12th 2019))
-* Submissions must follow the format outlined above and shown in the 'Dummy Submission File'. Any submissions that are not in the correct format will not be accepted.
-* Submissions need to include the player names for the hypothetical match up and the probability of the first player winning
-i.e. player_1,player_2,probability_of_player_1_winning,
-* Submissions must be in a csv format
-* Only two models will be accepted per participant (one model for the men's draw, one model for the women's draw)
-* You will receive an email upon registration with your player ID, which is to be used in your file name to identify it as your model
-* Submissions must follow the prescribed naming convention: datathon_submission_mens_playerID.csv and datathon_submission_womens_playerID.csv, where playerID is your unique player ID
+For an outline of our methodology and thought process, read [this](https://www.betfair.com.au/hub/betfairs-aus-open-datathon-how-to-build-a-model/) article.
 
 ## Tutorials
 The follow tutorials will walk you through the full process from exploring the data, to creating features, to finally modelling the problem. The tutorials are written in both R and Python
